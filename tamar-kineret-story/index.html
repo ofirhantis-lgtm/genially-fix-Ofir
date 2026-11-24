@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הסיפור על תמר כנרת</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sand: #f7ecd9;
+    --sand-2: #efd9b4;
+    --dune: #e0b97f;
+    --dune-dark: #c98f4a;
+    --ink: #3a2a1c;
+    --muted: #6d5a47;
+    --lake: #3f8fb8;
+    --lake-light: #8cc6e0;
+    --sky: #cfe9f5;
+    --leaf: #4f8a3c;
+    --leaf-dark: #2f5f26;
+    --trunk: #8a5a32;
+    --date: #8b3a1d;
+    --card: #fffaf1;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--sand);
+    color: var(--ink);
+    font-family: "Rubik", "Segoe UI", Arial, sans-serif;
+    font-size: clamp(18px, 2.4vw, 21px);
+    line-height: 1.75;
+    word-spacing: normal;
+  }
+  svg { display: block; width: 100%; height: auto; }
+  .hero { background: var(--sky); }
+  .hero-text { text-align: center; padding: 26px 16px 8px; }
+  h1 {
+    margin: 0;
+    font-family: "Frank Ruhl Libre", "David", serif;
+    font-weight: 900;
+    font-size: clamp(34px, 7vw, 60px);
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .tagline {
+    margin: 8px auto 0;
+    font-size: clamp(18px, 3vw, 24px);
+    color: var(--muted);
+    font-weight: 500;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
+  section.chapter {
+    background: var(--card);
+    border-radius: 22px;
+    padding: clamp(18px, 4vw, 32px);
+    margin: 22px 0;
+    box-shadow: 0 4px 18px rgba(58, 42, 28, .08);
+  }
+  .chapter .num {
+    display: inline-block;
+    font-family: "Frank Ruhl Libre", serif; font-weight: 700;
+    background: var(--dune); color: #fff;
+    width: 38px; height: 38px; line-height: 38px; text-align: center;
+    border-radius: 50%; font-size: 20px; margin-left: 10px; vertical-align: middle;
+  }
+  h2 {
+    margin: 0 0 12px;
+    font-family: "Frank Ruhl Libre", "David", serif;
+    font-weight: 700;
+    font-size: clamp(25px, 4.4vw, 34px);
+    line-height: 1.3;
+  }
+  p { margin: 0 0 14px; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: #7a3510; font-weight: 700; }
+  .mark { background: linear-gradient(transparent 55%, #f6d58e 55%); padding: 0 2px; }
+  .word {
+    background: var(--sand); border-right: 5px solid var(--leaf);
+    border-radius: 10px; padding: 10px 14px; margin: 14px 0 0;
+    font-size: .92em;
+  }
+  .art { margin: 18px 0 0; border-radius: 16px; overflow: hidden; }
+  .art figcaption { font-size: 15px; color: var(--muted); text-align: center; padding-top: 6px; }
+  blockquote {
+    margin: 26px 0;
+    background: var(--ink); color: #fff7e6;
+    border-radius: 22px; padding: clamp(22px, 5vw, 36px);
+    text-align: center; position: relative;
+  }
+  blockquote .q {
+    font-family: "Frank Ruhl Libre", serif; font-weight: 700;
+    font-size: clamp(24px, 4.6vw, 36px); line-height: 1.4; margin: 0;
+  }
+  blockquote .who { margin: 14px 0 0; font-size: clamp(16px, 2.4vw, 19px); color: #f0d6a8; }
+  .ending { text-align: center; }
+  .ending .big {
+    font-family: "Frank Ruhl Libre", serif; font-weight: 900;
+    font-size: clamp(30px, 6vw, 46px); color: var(--date); margin: 6px 0 0;
+  }
+  footer { text-align: center; font-size: 14px; color: var(--muted); padding: 0 16px 30px; }
+</style>
+</head>
+<body>
+
+<!-- ===== סמלים לשימוש חוזר באיורים ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="palm" viewBox="0 0 120 200">
+      <path d="M62 198 C58 150 56 110 64 62" stroke="#8a5a32" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M62 190 l-6 -4 M61 174 l-6 -4 M60 158 l-6 -4 M60 142 l-6 -4 M60 126 l-6 -4 M61 110 l-6 -4 M62 94 l-6 -4 M63 78 l-6 -4" stroke="#6e4524" stroke-width="2.5"/>
+      <g fill="#4f8a3c" stroke="#2f5f26" stroke-width="2">
+        <path d="M64 62 C40 40 18 44 2 64 C22 52 42 54 64 66 Z"/>
+        <path d="M64 62 C88 40 106 44 118 64 C100 52 82 54 64 66 Z"/>
+        <path d="M64 60 C52 30 34 18 12 22 C34 28 50 40 62 64 Z"/>
+        <path d="M64 60 C76 30 94 18 114 24 C92 28 76 42 66 64 Z"/>
+        <path d="M64 60 C62 34 66 14 78 2 C74 22 70 40 66 62 Z"/>
+        <path d="M64 64 C46 66 30 78 22 96 C36 82 50 74 64 70 Z"/>
+        <path d="M64 64 C82 66 98 78 104 98 C92 82 78 74 64 70 Z"/>
+      </g>
+      <g fill="#8b3a1d">
+        <circle cx="56" cy="74" r="4"/><circle cx="51" cy="80" r="4"/><circle cx="58" cy="82" r="4"/><circle cx="53" cy="88" r="4"/>
+        <circle cx="72" cy="74" r="4"/><circle cx="77" cy="80" r="4"/><circle cx="70" cy="82" r="4"/>
+      </g>
+    </symbol>
+    <symbol id="sapling" viewBox="0 0 60 70">
+      <path d="M30 68 L30 36" stroke="#8a5a32" stroke-width="5" stroke-linecap="round"/>
+      <g fill="#5d9b45" stroke="#2f5f26" stroke-width="1.5">
+        <path d="M30 38 C20 24 10 22 2 28 C12 28 22 32 30 42 Z"/>
+        <path d="M30 38 C40 24 50 22 58 28 C48 28 38 32 30 42 Z"/>
+        <path d="M30 38 C28 22 32 10 40 2 C36 16 34 26 32 40 Z"/>
+      </g>
+    </symbol>
+    <symbol id="camel" viewBox="0 0 130 100">
+      <g fill="#6b4423">
+        <ellipse cx="56" cy="50" rx="34" ry="15"/>
+        <ellipse cx="52" cy="36" rx="20" ry="15"/>
+        <path d="M84 50 C90 40 92 26 98 18 L108 18 C110 22 108 26 104 27 C100 34 98 46 92 56 Z"/>
+        <ellipse cx="108" cy="21" rx="10" ry="6"/>
+        <rect x="28" y="58" width="6" height="36" rx="3"/>
+        <rect x="40" y="58" width="6" height="36" rx="3"/>
+        <rect x="68" y="58" width="6" height="36" rx="3"/>
+        <rect x="80" y="58" width="6" height="36" rx="3"/>
+        <path d="M23 48 C16 54 15 62 18 68" stroke="#6b4423" stroke-width="3" fill="none"/>
+      </g>
+      <circle cx="111" cy="19" r="1.6" fill="#fff"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="hero-text">
+    <h1>הסיפור על תמר כנרת</h1>
+    <p class="tagline">אגדה ציונית שהתגשמה: איך חזר התמר הביתה</p>
+  </div>
+  <!-- איור פתיחה: הכנרת, הגבעות ועצי התמר -->
+  <svg viewBox="0 0 1200 380" role="img" aria-label="איור: הכנרת, הרים ברקע ועצי תמר על החוף">
+    <defs>
+      <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#cfe9f5"/><stop offset="1" stop-color="#f6e7c8"/>
+      </linearGradient>
+      <linearGradient id="lakeG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#5aa6cc"/><stop offset="1" stop-color="#2f7aa3"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="380" fill="url(#skyG)"/>
+    <circle cx="980" cy="90" r="46" fill="#ffd36b"/>
+    <path d="M0 210 C140 140 260 160 380 175 C520 120 640 130 780 165 C900 120 1040 130 1200 170 L1200 250 L0 250 Z" fill="#a9b98a"/>
+    <path d="M0 225 C160 185 300 200 460 205 C620 180 800 190 960 205 C1060 195 1140 200 1200 205 L1200 260 L0 260 Z" fill="#8fa774"/>
+    <path d="M0 240 C200 228 420 232 600 236 C800 230 1000 232 1200 238 L1200 320 L0 320 Z" fill="url(#lakeG)"/>
+    <g stroke="#bfe3f3" stroke-width="3" stroke-linecap="round" opacity=".8">
+      <path d="M120 262 h60 M260 280 h80 M480 268 h50 M640 290 h90 M860 270 h70 M1020 288 h60 M380 300 h60"/>
+    </g>
+    <path d="M760 268 l40 0 l-6 10 l-30 0 Z" fill="#fff"/><path d="M780 268 l0 -34 l18 30 Z" fill="#fffaf1"/>
+    <path d="M0 312 C200 300 420 306 600 310 C820 302 1000 306 1200 300 L1200 380 L0 380 Z" fill="#e8c98e"/>
+    <use href="#palm" x="20" y="150" width="140" height="233"/>
+    <use href="#palm" x="130" y="190" width="110" height="183"/>
+    <use href="#palm" x="1040" y="150" width="140" height="233"/>
+    <use href="#palm" x="960" y="200" width="100" height="166"/>
+    <use href="#palm" x="880" y="235" width="80" height="133"/>
+  </svg>
+</header>
+
+<main>
+
+  <section class="chapter">
+    <h2><span class="num">1</span>חלום של חלוצים</h2>
+    <p>בחצר של <strong>קבוצת כנרת</strong>, בין עצי התמר, אפשר עד היום להרגיש את פעימות הלב של ההיסטוריה.</p>
+    <p>הכול התחיל ב<strong>חזון של חלוצים</strong>, חברי הקיבוץ, שרצו להחזיר את <span class="mark">עץ התמר אל ארץ התנ"ך</span>. בהתחלה זה היה רק רצון. הרצון הפך לחלום, והחלום הפך למציאות.</p>
+  </section>
+
+  <section class="chapter">
+    <h2><span class="num">2</span>17 לירות והרבה אמונה</h2>
+    <p>החלום יצא לדרך עם <strong>17 לירות בכיס</strong> והרבה מאוד אמונה, במסע שבעצם לא נגמר עד היום.</p>
+    <p>שני חולמים, חברי קבוצת כנרת, <strong>בן ציון ישראלי</strong> ו<strong>עמרם רבר</strong>, יצאו לדרך. הם קיבלו השראה מ<strong>שמואל סטולר</strong>, שהיה ידוע בחלומות הגדולים שלו על תמרים.</p>
+    <p>השניים יצאו למבצע מסוכן וסודי: <span class="mark">המבצע להחזרת התמר</span>.</p>
+  </section>
+
+  <section class="chapter">
+    <h2><span class="num">3</span>מסע מסוכן אל ארץ בבל</h2>
+    <p>הם עשו את דרכם דרך <strong>ביירות</strong>, <strong>דמשק</strong> ו<strong>איראן</strong>, עברו בין <strong>נהר הפרת</strong> ל<strong>נהר החידקל</strong> ונכנסו אל תוך <strong>עיראק</strong>. בדרך היו סכנות רבות ודרכים מפותלות, עד שהגיעו סוף סוף אל החוטרים שכל כך רצו בהם.</p>
+    <p>את החוטרים הם <strong>הבריחו על גבי גמלים ומשאיות</strong>, בדרכים שאינן דרכים, דרך גבולות של מדינות אויב. בלב שלהם היה רק דבר אחד: החלום להצמיח היסטוריה בארץ ישראל, ו<span class="mark">להחזיר את התמר מגלות בבל אל ארץ התנ"ך</span>.</p>
+    <p class="word"><strong>מה זה חוטר?</strong> שתיל קטן שצומח בבסיס של עץ תמר. מפרידים אותו מהעץ ושותלים אותו, וממנו גדל עץ תמר חדש.</p>
+    <figure class="art">
+      <!-- איור המסע: מדבר, גמלים ומסלול -->
+      <svg viewBox="0 0 1000 420" role="img" aria-label="איור: מסלול המסע מהכנרת דרך ביירות, דמשק ואיראן אל עיראק, וגמלים במדבר נושאים חוטרים">
+        <defs>
+          <linearGradient id="desG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fbe3b5"/><stop offset="1" stop-color="#f3c98a"/>
+          </linearGradient>
+        </defs>
+        <rect width="1000" height="420" fill="url(#desG)"/>
+        <circle cx="470" cy="46" r="30" fill="#ffcf5a" opacity=".9"/>
+        <path d="M0 300 C120 250 240 260 360 290 C480 240 620 250 760 285 C860 255 940 260 1000 270 L1000 420 L0 420 Z" fill="#e7b46d"/>
+        <path d="M0 350 C160 320 300 330 460 345 C620 320 820 330 1000 340 L1000 420 L0 420 Z" fill="#d89e55"/>
+        <!-- נהרות הפרת והחידקל -->
+        <path d="M600 40 C640 90 620 140 660 190 C690 230 680 260 700 290" stroke="#6fb3d6" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M720 30 C740 80 770 120 760 170 C752 210 770 250 760 290" stroke="#6fb3d6" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <text x="612" y="34" font-size="20" fill="#2f6f93" font-family="Rubik, Arial" font-weight="700" text-anchor="middle">פרת</text>
+        <text x="745" y="24" font-size="20" fill="#2f6f93" font-family="Rubik, Arial" font-weight="700" text-anchor="middle">חידקל</text>
+        <!-- מסלול -->
+        <path d="M90 240 C80 170 100 120 130 100 C170 110 200 140 230 150 C380 120 560 80 900 90 C860 160 790 190 720 200" stroke="#7a3510" stroke-width="4" stroke-dasharray="10 10" fill="none"/>
+        <g font-family="Rubik, Arial" font-size="22" font-weight="700" fill="#3a2a1c" text-anchor="middle">
+          <circle cx="90" cy="240" r="9" fill="#3f8fb8"/><text x="90" y="275">כנרת</text>
+          <circle cx="130" cy="100" r="8" fill="#7a3510"/><text x="130" y="85">ביירות</text>
+          <circle cx="230" cy="150" r="8" fill="#7a3510"/><text x="240" y="185">דמשק</text>
+          <circle cx="900" cy="90" r="8" fill="#7a3510"/><text x="900" y="72">איראן</text>
+          <circle cx="720" cy="200" r="10" fill="#4f8a3c"/><text x="720" y="236">עיראק</text>
+        </g>
+        <!-- שיירת גמלים עם חוטרים, בדרך חזרה לכנרת -->
+        <g transform="translate(940 0) scale(-1 1)">
+          <use href="#camel" x="300" y="245" width="140" height="108"/>
+          <use href="#sapling" x="345" y="222" width="36" height="42"/>
+          <use href="#camel" x="430" y="262" width="120" height="92"/>
+          <use href="#sapling" x="468" y="242" width="30" height="35"/>
+          <use href="#camel" x="540" y="278" width="100" height="77"/>
+          <use href="#sapling" x="572" y="262" width="26" height="30"/>
+        </g>
+      </svg>
+      <figcaption>איור של המסע (לא מפה מדויקת)</figcaption>
+    </figure>
+  </section>
+
+  <section class="chapter">
+    <h2><span class="num">4</span>התמר שב הביתה</h2>
+    <p>החוטרים נשתלו ב<strong>גינה של רחל המשוררת</strong> והתחילו לצמוח.</p>
+    <p>לאט לאט הם הצמיחו איתם את העמק שעל <strong>חופי הכנרת</strong>, התפשטו אל <strong>מרחבי עמק הירדן</strong>, והפכו את השממה לפורחת, עד <strong>סדום</strong>.</p>
+    <p><span class="mark">התמר חזר הביתה.</span></p>
+    <figure class="art">
+      <!-- איור: מחוטר קטן למטע -->
+      <svg viewBox="0 0 1000 300" role="img" aria-label="איור: חוטר קטן שגדל לעץ תמר, ואחריו מטע תמרים שלם ליד הכנרת">
+        <rect width="1000" height="300" fill="#e3f2f8"/>
+        <path d="M0 210 C200 190 400 196 600 200 C800 194 900 196 1000 192 L1000 300 L0 300 Z" fill="#cfe0a6"/>
+        <path d="M640 206 C760 200 880 202 1000 198 L1000 236 C880 238 760 236 640 234 Z" fill="#5aa6cc"/>
+        <rect y="236" width="1000" height="64" fill="#b9d48a"/>
+        <use href="#sapling" x="40" y="168" width="60" height="70"/>
+        <path d="M120 200 l40 0 m-12 -10 l12 10 l-12 10" stroke="#7a3510" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <use href="#palm" x="170" y="120" width="70" height="117"/>
+        <path d="M262 200 l40 0 m-12 -10 l12 10 l-12 10" stroke="#7a3510" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <use href="#palm" x="310" y="70" width="100" height="167"/>
+        <use href="#palm" x="380" y="90" width="90" height="150"/>
+        <use href="#palm" x="450" y="70" width="100" height="167"/>
+        <use href="#palm" x="520" y="95" width="88" height="147"/>
+        <use href="#palm" x="590" y="80" width="96" height="160"/>
+        <use href="#palm" x="680" y="110" width="80" height="133"/>
+        <use href="#palm" x="760" y="120" width="72" height="120"/>
+        <use href="#palm" x="830" y="125" width="66" height="110"/>
+        <use href="#palm" x="900" y="130" width="62" height="103"/>
+      </svg>
+      <figcaption>מחוטר קטן, לעץ, למטע שלם</figcaption>
+    </figure>
+  </section>
+
+  <blockquote>
+    <p class="q">"לכבוש את השממה אפשר בעקשנות, באמצעים, בניסיון ובתבונה"</p>
+    <p class="who">כתב בן ציון ישראלי באחד מיומני המסעות שלו</p>
+  </blockquote>
+
+  <section class="chapter">
+    <h2><span class="num">5</span>והיום?</h2>
+    <p><strong>80 שנה אחרי</strong>, בחצר של קבוצת כנרת ממשיכים להגשים את החלום בכל יום, באותה עקשנות, ועם הניסיון והתבונה שהחלוצים הביאו מהמסע שלהם.</p>
+    <p>את התמרים קוטפים במטעים שעל <strong>הגבעה שמעל הכנרת</strong>. אורזים אותם בקופסאות ובצנצנות, ובכל אחת מהן יש קצת מהטעם של האגדה הציונית שהתגשמה, אגדה שעדיין פועמת בלב של אנשי הקבוצה.</p>
+    <div class="ending">
+      <svg viewBox="0 0 220 200" style="max-width:170px;margin:10px auto 0" role="img" aria-label="איור: צנצנת מלאה תמרים">
+        <rect x="62" y="28" width="96" height="22" rx="6" fill="#8a5a32"/>
+        <path d="M54 52 h112 c10 0 14 8 14 18 v100 c0 14 -10 22 -24 22 h-92 c-14 0 -24 -8 -24 -22 v-100 c0 -10 4 -18 14 -18 Z" fill="#e9f4f8" stroke="#9cc3d3" stroke-width="4"/>
+        <g fill="#8b3a1d" stroke="#5e2410" stroke-width="2">
+          <ellipse cx="80" cy="170" rx="16" ry="10"/><ellipse cx="112" cy="174" rx="16" ry="10"/><ellipse cx="144" cy="170" rx="16" ry="10"/>
+          <ellipse cx="94" cy="150" rx="16" ry="10"/><ellipse cx="128" cy="150" rx="16" ry="10"/>
+          <ellipse cx="78" cy="130" rx="16" ry="10"/><ellipse cx="110" cy="128" rx="16" ry="10"/><ellipse cx="142" cy="130" rx="16" ry="10"/>
+          <ellipse cx="96" cy="108" rx="16" ry="10"/><ellipse cx="128" cy="108" rx="16" ry="10"/>
+        </g>
+        <rect x="70" y="72" width="80" height="26" rx="5" fill="#fffaf1" stroke="#c98f4a" stroke-width="2"/>
+        <text x="110" y="91" font-size="16" font-family="Rubik, Arial" font-weight="700" fill="#7a3510" text-anchor="middle">תמרים</text>
+      </svg>
+      <p class="big">היסטוריה ארוזה בצנצנת</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>הסיפור מבוסס על עמוד "אודותינו" באתר תמר כנרת, בניסוח מותאם לתלמידים. האיורים צוירו במיוחד לדף הזה.</footer>
+
+</body>
+</html>
