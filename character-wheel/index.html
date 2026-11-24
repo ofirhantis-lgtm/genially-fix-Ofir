@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>גלגל הדמויות</title>
+<style>
+  :root {
+    --bg: #f6f1e7;
+    --ink: #2b2520;
+    --accent: #b5562a;
+    --accent-dark: #8f3f1c;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", Arial, "Noto Sans Hebrew", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 16px;
+    min-height: 100vh;
+  }
+  h1 { margin: 0; font-size: clamp(22px, 4vw, 34px); text-align: center; }
+  .sub { margin: 0; font-size: clamp(14px, 2.2vw, 18px); text-align: center; max-width: 560px; line-height: 1.5; }
+  .wheel-wrap { position: relative; width: min(82vw, 62vh, 460px); aspect-ratio: 1; }
+  canvas { width: 100%; height: 100%; display: block; }
+  .pointer {
+    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 18px solid transparent; border-right: 18px solid transparent;
+    border-top: 34px solid var(--ink);
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,.3));
+  }
+  button {
+    font: inherit; font-size: clamp(18px, 3vw, 22px); font-weight: 700;
+    background: var(--accent); color: #fff; border: 0; border-radius: 999px;
+    padding: 12px 40px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-dark);
+  }
+  button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-dark); }
+  button:disabled { opacity: .6; cursor: default; }
+  .result {
+    min-height: 1.6em; font-size: clamp(20px, 3.4vw, 28px); font-weight: 700; text-align: center;
+    background: var(--card); border-radius: 14px; padding: 8px 22px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    visibility: hidden;
+  }
+  .result.show { visibility: visible; }
+</style>
+</head>
+<body>
+  <h1 id="title">הכנסו לדמות</h1>
+  <p class="sub" id="sub">סובבו את הגלגל. הדמות שתעלה היא הדמות שלכם: אמרו בשמה כמה משפטים בהמשך לסיפור.</p>
+  <div class="wheel-wrap">
+    <div class="pointer" aria-hidden="true"></div>
+    <canvas id="wheel" width="900" height="900" role="img" aria-label="גלגל הדמויות"></canvas>
+  </div>
+  <button id="spin" type="button">סובבו!</button>
+  <div class="result" id="result" aria-live="polite"></div>
+
+<script>
+  // ===== השמות על הגלגל: אפשר לשנות כאן =====
+  var DEFAULT_NAMES = ["זאוס", "פרומתאוס", "אפימתאוס", "פנדורה", "הפייסטוס", "אתנה", "הרמס", "הרה"];
+
+  // אפשר גם לתת שמות בכתובת: ?names=זאוס,פנדורה,הרמס  וכותרת: &title=...
+  var params = new URLSearchParams(location.search);
+  var names = (params.get("names") || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+  if (names.length < 2) names = DEFAULT_NAMES;
+  if (params.get("title")) document.getElementById("title").textContent = params.get("title");
+  if (params.get("sub")) document.getElementById("sub").textContent = params.get("sub");
+
+  var COLORS = ["#e07a5f", "#3d405b", "#81b29a", "#f2cc8f", "#6d597a", "#e5989b", "#457b9d", "#c9ada7"];
+  var canvas = document.getElementById("wheel");
+  var ctx = canvas.getContext("2d");
+  var size = canvas.width, c = size / 2, r = c - 12;
+  var seg = 2 * Math.PI / names.length;
+  var angle = 0;        // סיבוב נוכחי של הגלגל
+  var spinning = false;
+
+  function textColor(hex) {
+    var n = parseInt(hex.slice(1), 16), R = n >> 16, G = (n >> 8) & 255, B = n & 255;
+    return (R * 299 + G * 587 + B * 114) / 1000 > 150 ? "#2b2520" : "#ffffff";
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, size, size);
+    for (var i = 0; i < names.length; i++) {
+      var start = angle + i * seg - Math.PI / 2;
+      var color = COLORS[i % COLORS.length];
+      if (names.length % COLORS.length === 1 && i === names.length - 1) color = COLORS[1];
+      ctx.beginPath(); ctx.moveTo(c, c); ctx.arc(c, c, r, start, start + seg); ctx.closePath();
+      ctx.fillStyle = color; ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.stroke();
+      ctx.save();
+      var mid = start + seg / 2;
+      var norm = ((mid % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      var flip = norm > Math.PI / 2 && norm < 3 * Math.PI / 2; // בצד שמאל: הופכים כדי שהשם לא יהיה הפוך
+      ctx.translate(c, c); ctx.rotate(flip ? mid + Math.PI : mid);
+      ctx.fillStyle = textColor(color);
+      ctx.direction = "rtl"; ctx.textBaseline = "middle";
+      ctx.textAlign = flip ? "left" : "right";
+      var fs = Math.min(54, Math.max(26, 360 / names.length + 14));
+      ctx.font = "700 " + fs + "px 'Segoe UI', Arial, sans-serif";
+      ctx.fillText(names[i], flip ? -(r - 28) : r - 28, 0);
+      ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(c, c, 46, 0, 2 * Math.PI);
+    ctx.fillStyle = "#fff"; ctx.fill();
+    ctx.lineWidth = 6; ctx.strokeStyle = "#2b2520"; ctx.stroke();
+  }
+
+  function winnerIndex() {
+    // המחוג למעלה: מוצאים איזה פלח נמצא מתחתיו
+    var a = ((-angle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    return Math.floor(a / seg) % names.length;
+  }
+
+  function spin() {
+    if (spinning) return;
+    spinning = true;
+    var btn = document.getElementById("spin"), res = document.getElementById("result");
+    btn.disabled = true; res.classList.remove("show");
+    var from = angle;
+    var turn = 2 * Math.PI * (5 + Math.random() * 3) + Math.random() * 2 * Math.PI;
+    var dur = 4200, t0 = null;
+    function step(t) {
+      if (!t0) t0 = t;
+      var p = Math.min(1, (t - t0) / dur);
+      var ease = 1 - Math.pow(1 - p, 3);
+      angle = from + turn * ease;
+      draw();
+      if (p < 1) { requestAnimationFrame(step); return; }
+      spinning = false; btn.disabled = false; btn.textContent = "סובבו שוב";
+      res.textContent = "הדמות שלכם: " + names[winnerIndex()];
+      res.classList.add("show");
+    }
+    requestAnimationFrame(step);
+  }
+
+  document.getElementById("spin").addEventListener("click", spin);
+  canvas.addEventListener("click", spin);
+  draw();
+</script>
+</body>
+</html>
