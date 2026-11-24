@@ -28,7 +28,7 @@
   }
   h1 { margin: 0; font-size: clamp(22px, 4vw, 34px); text-align: center; }
   .sub { margin: 0; font-size: clamp(14px, 2.2vw, 18px); text-align: center; max-width: 560px; line-height: 1.5; }
-  .wheel-wrap { position: relative; width: min(82vw, 62vh, 460px); aspect-ratio: 1; }
+  .wheel-wrap { position: relative; width: min(86vw, 68vh, 480px); aspect-ratio: 1; }
   canvas { width: 100%; height: 100%; display: block; }
   .pointer {
     position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
@@ -53,8 +53,6 @@
 </style>
 </head>
 <body>
-  <h1 id="title">הכנסו לדמות</h1>
-  <p class="sub" id="sub">סובבו את הגלגל. הדמות שתעלה היא הדמות שלכם: אמרו בשמה כמה משפטים בהמשך לסיפור.</p>
   <div class="wheel-wrap">
     <div class="pointer" aria-hidden="true"></div>
     <canvas id="wheel" width="900" height="900" role="img" aria-label="גלגל הדמויות"></canvas>
@@ -66,12 +64,10 @@
   // ===== השמות על הגלגל: אפשר לשנות כאן =====
   var DEFAULT_NAMES = ["זאוס", "פרומתאוס", "אפימתאוס", "פנדורה", "הפייסטוס", "אתנה", "הרמס", "הרה"];
 
-  // אפשר גם לתת שמות בכתובת: ?names=זאוס,פנדורה,הרמס  וכותרת: &title=...
+  // אפשר גם לתת שמות בכתובת: ?names=זאוס,פנדורה,הרמס
   var params = new URLSearchParams(location.search);
   var names = (params.get("names") || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
   if (names.length < 2) names = DEFAULT_NAMES;
-  if (params.get("title")) document.getElementById("title").textContent = params.get("title");
-  if (params.get("sub")) document.getElementById("sub").textContent = params.get("sub");
 
   var COLORS = ["#e07a5f", "#3d405b", "#81b29a", "#f2cc8f", "#6d597a", "#e5989b", "#457b9d", "#c9ada7"];
   var canvas = document.getElementById("wheel");
