@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>חידון מסכם — חינוך פיננסי</title>
+<style>
+  :root {
+    --bg: #1f2b6b;
+    --bg2: #2a3698;
+    --cell: #3445b8;
+    --cell-hover: #4255d0;
+    --used: #232d6e;
+    --gold: #ffcf4a;
+    --ink: #ffffff;
+    --muted: #b9c2f2;
+    --panel: #ffffff;
+    --panel-ink: #1c2340;
+    --good: #2e8b57;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 0%, var(--bg2), var(--bg) 70%);
+    color: var(--ink);
+    font-family: "Segoe UI", Arial, "Noto Sans Hebrew", sans-serif;
+    display: flex; flex-direction: column;
+    padding: clamp(6px, 1.6vw, 14px); gap: clamp(6px, 1.2vw, 10px);
+    min-height: 100vh;
+  }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  h1 { margin: 0; font-size: clamp(17px, 3.2vw, 26px); color: var(--gold); text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+  .linkbtn {
+    font: inherit; font-size: clamp(13px, 2vw, 15px); font-weight: 600;
+    background: transparent; color: var(--muted); border: 1.5px solid var(--muted);
+    border-radius: 999px; padding: 4px 14px; cursor: pointer;
+  }
+  .linkbtn:hover { color: #fff; border-color: #fff; }
+
+  .board {
+    flex: 1; display: grid; gap: clamp(4px, .9vw, 8px);
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: auto repeat(4, 1fr);
+    min-height: 0;
+  }
+  .head { text-align: center; line-height: 1.2;
+    background: var(--bg); border: 2px solid var(--cell); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: clamp(14px, 2.6vw, 20px); color: var(--muted);
+    padding: clamp(4px, 1vw, 8px) 2px;
+  }
+  .cell {
+    font: inherit; font-weight: 800; font-size: clamp(20px, 4.6vw, 38px);
+    color: var(--gold); background: var(--cell);
+    border: 0; border-radius: 10px; cursor: pointer;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,.25);
+    text-shadow: 0 2px 0 rgba(0,0,0,.3);
+    min-height: 40px;
+    transition: background .15s, transform .1s;
+  }
+  .cell:hover:not(:disabled) { background: var(--cell-hover); transform: translateY(-1px); }
+  .cell:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .cell:disabled { background: var(--used); color: transparent; text-shadow: none; box-shadow: none; cursor: default; }
+
+  .teams { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .team {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.1); border-radius: 999px;
+    padding: 3px 6px 3px 12px; font-size: clamp(13px, 2.1vw, 16px);
+  }
+  .team b { color: var(--gold); min-width: 2.6em; text-align: center; }
+  .team button {
+    font: inherit; font-weight: 800; width: 26px; height: 26px; border-radius: 50%;
+    border: 0; background: rgba(255,255,255,.18); color: #fff; cursor: pointer; line-height: 1;
+  }
+  .team button:hover { background: rgba(255,255,255,.32); }
+
+  /* question overlay */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(15, 20, 60, .82);
+    display: flex; align-items: center; justify-content: center; padding: 12px; z-index: 5;
+  }
+  .q {
+    width: min(100%, 720px); max-height: 100%; overflow: auto;
+    background: var(--panel); color: var(--panel-ink);
+    border-radius: 18px; padding: clamp(14px, 3vw, 26px); text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  .q .pts { display: inline-block; background: var(--cell); color: var(--gold); font-weight: 800;
+    border-radius: 999px; padding: 2px 16px; font-size: clamp(15px, 2.4vw, 18px); margin-bottom: 10px; }
+  .q h2 { margin: 0 0 14px; font-size: clamp(20px, 4vw, 30px); line-height: 1.35; }
+  .answer { display: none; background: #eef7f1; border: 2px solid var(--good); border-radius: 14px;
+    padding: 10px 14px; margin-bottom: 14px; font-size: clamp(17px, 3vw, 22px); line-height: 1.45; }
+  .answer.show { display: block; }
+  .answer small { display: block; color: var(--good); font-weight: 700; font-size: .75em; margin-bottom: 2px; }
+  .answer ul { margin: 0; padding: 0; list-style: none; }
+  .answer li + li { margin-top: 2px; }
+  .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .btn {
+    font: inherit; font-size: clamp(15px, 2.6vw, 18px); font-weight: 700;
+    background: var(--cell); color: #fff; border: 0; border-radius: 999px;
+    padding: 9px 22px; cursor: pointer; box-shadow: 0 3px 0 var(--used);
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--used); }
+  .btn.gold { background: var(--gold); color: var(--panel-ink); box-shadow: 0 3px 0 #c99a1c; }
+  .btn.ghost { background: #e6e9f7; color: var(--panel-ink); box-shadow: 0 3px 0 #c5cbe6; }
+  .btn:focus-visible { outline: 3px solid var(--panel-ink); outline-offset: 2px; }
+  .who { margin: 4px 0 8px; font-weight: 700; color: #55607f; font-size: clamp(14px, 2.4vw, 16px); }
+  .hidden { display: none !important; }
+
+  .setup h2 { margin-bottom: 6px; }
+  .setup p { margin: 0 0 14px; color: #55607f; font-size: clamp(15px, 2.4vw, 17px); line-height: 1.5; }
+  .nums { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .nums .btn { min-width: 52px; padding: 9px 0; }
+  .winner { font-size: clamp(22px, 4.4vw, 32px); font-weight: 800; color: var(--cell); margin: 6px 0 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>חידון מסכם — חינוך פיננסי</h1>
+  <button class="linkbtn" id="newGame">משחק חדש</button>
+</header>
+<div class="board" id="board"></div>
+<div class="teams" id="teams"></div>
+
+<div class="overlay" id="setup">
+  <div class="q setup">
+    <h2>כמה קבוצות משחקות?</h2>
+    <p>בוחרים משבצת, קוראים את השאלה, ואחרי התשובה בוחרים איזו קבוצה צדקה.</p>
+    <div class="nums" id="nums"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="ask">
+  <div class="q">
+    <span class="pts" id="qPts"></span>
+    <h2 id="qText"></h2>
+    <div class="answer" id="qAns"></div>
+    <div class="row" id="revealRow">
+      <button class="btn gold" id="reveal">הצגת התשובה</button>
+    </div>
+    <div class="hidden" id="awardRow">
+      <div class="who">איזו קבוצה צדקה?</div>
+      <div class="row" id="award"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="end">
+  <div class="q">
+    <h2>סיימנו את כל השאלות!</h2>
+    <div class="winner" id="winner"></div>
+    <div class="row"><button class="btn gold" id="again">משחק חדש</button></div>
+  </div>
+</div>
+
+<script>
+// חמש קטגוריות, בכל אחת 4 שאלות מהקלה (100) לקשה (400). כמה תשובות נכונות = מופרדות ב־|
+const CATS = [
+  ["מה זה כסף?", [
+    ["כסף הוא:", "אמצעי תשלום מוסכם"],
+    ["מה היה לפני שהמציאו את הכסף?", "אנשים סיפקו לעצמם את הצרכים או עסקו בסחר חליפין"],
+    ["המדינה לה מיוחסת המצאת השטרות הינה:", "סין"],
+    ["ציינו פתגם בנושא כסף", "עניי עירך קודמים|איזהו עשיר? השמח בחלקו|כסף זה לא הכול בחיים"],
+  ]],
+  ["הבנק", [
+    ["הבנק הוא:", "מוסד פיננסי שעיסוקו העיקרי הוא טיפול ותיווך בכסף"],
+    ["הבנקאי הראשון היה:", "הצורף"],
+    ["מה זו יתרה?", "שארית|עודף"],
+    ["מה זו הלוואה?", "נתינת כסף לאדם או ארגון בתנאי שישיבו לאחר זמן מסוים"],
+  ]],
+  ["אמצעי תשלום", [
+    ["מה זה ביט?", "אפליקציית תשלומים"],
+    ["המטבע הישראלי בעל הערך הקטן ביותר", "10 אגורות"],
+    ["אמצעי תשלום חדשני", "ארנק דיגיטלי"],
+    ["רכשתי מחשב בתשלומים. מה פירוש הדבר?", "תשלום בכמה פעימות, למשל אחת לחודש במשך 3 חודשים"],
+  ]],
+  ["הכנסות ומיסים", [
+    ["הדרך השכיחה לצבור כסף היא:", "עבודה בשכר"],
+    ["למדינה יש כסף המגיע בעיקר מ...", "מיסים שמשלמים האזרחים"],
+    ["מה זה נטו?", "הסכום הנקי לאחר מיסים והוצאות"],
+    ["מתי מכירת מוצרים תהיה רווחית?", "כשהתשלומים מהמכירות יהיו גבוהים מההוצאות"],
+  ]],
+  ["תקציב וחיסכון", [
+    ["מהי קנייה נכונה?", "כשקונים מה שצריך ולאחר השוואת מחירים"],
+    ["מהו תקציב מאוזן?", "כשההוצאות קטנות או שוות להכנסות"],
+    ["לעיתים יש הוצאות בלתי צפויות. ציין דוגמה.", "תקר בגלגל|תיקון מכונת כביסה"],
+    ["חשוב לחסוך כי:", "שיהיה להוצאות בלתי צפויות|נותן ביטחון|מאפשר לקנות דברים גדולים"],
+  ]],
+];
+const POINTS = [100, 200, 300, 400];
+
+const $ = id => document.getElementById(id);
+let teams = [], left = 0, cur = null;
+
+function buildBoard() {
+  const b = $("board"); b.innerHTML = "";
+  CATS.forEach(([name]) => { const h = document.createElement("div"); h.className = "head"; h.textContent = name; b.appendChild(h); });
+  POINTS.forEach((pts, r) => CATS.forEach(([name, qs]) => {
+    const [q, a] = qs[r]; const item = { pts, q, a, cat: name };
+    const btn = document.createElement("button");
+    btn.className = "cell"; btn.textContent = pts;
+    btn.setAttribute("aria-label", name + ", " + pts + " נקודות");
+    btn.onclick = () => openQ(item, btn);
+    b.appendChild(btn);
+  }));
+  left = CATS.length * POINTS.length;
+}
+
+function drawTeams() {
+  const t = $("teams"); t.innerHTML = "";
+  teams.forEach((tm, i) => {
+    const d = document.createElement("div"); d.className = "team";
+    d.innerHTML = `<span>${tm.name}</span><b>${tm.score}</b>`;
+    const plus = document.createElement("button"); plus.textContent = "+"; plus.title = "הוספת 100";
+    plus.onclick = () => { tm.score += 100; drawTeams(); };
+    const minus = document.createElement("button"); minus.textContent = "−"; minus.title = "הורדת 100";
+    minus.onclick = () => { tm.score -= 100; drawTeams(); };
+    d.append(plus, minus); t.appendChild(d);
+  });
+}
+
+function startGame(n) {
+  teams = Array.from({ length: n }, (_, i) => ({ name: n === 1 ? "ניקוד" : `קבוצה ${i + 1}`, score: 0 }));
+  buildBoard(); drawTeams();
+  $("setup").classList.add("hidden"); $("end").classList.add("hidden");
+}
+
+function openQ(item, btn) {
+  cur = { item, btn };
+  $("qPts").textContent = `${item.cat} · ${item.pts} נקודות`;
+  $("qText").textContent = item.q;
+  const answers = item.a.split("|");
+  $("qAns").innerHTML = `<small>${answers.length > 1 ? "תשובות אפשריות" : "התשובה"}</small><ul>${answers.map(x => `<li>${x}</li>`).join("")}</ul>`;
+  $("qAns").classList.remove("show");
+  $("revealRow").classList.remove("hidden");
+  $("awardRow").classList.add("hidden");
+  const aw = $("award"); aw.innerHTML = "";
+  teams.forEach(tm => {
+    const b = document.createElement("button"); b.className = "btn"; b.textContent = tm.name === "ניקוד" ? "צדקתי" : tm.name;
+    b.onclick = () => { tm.score += item.pts; closeQ(); };
+    aw.appendChild(b);
+  });
+  const none = document.createElement("button"); none.className = "btn ghost"; none.textContent = "אף אחד";
+  none.onclick = closeQ; aw.appendChild(none);
+  $("ask").classList.remove("hidden");
+  $("reveal").focus();
+}
+
+function closeQ() {
+  cur.btn.disabled = true; left--;
+  $("ask").classList.add("hidden"); drawTeams();
+  if (left === 0) showEnd();
+}
+
+function showEnd() {
+  let txt = "";
+  if (teams.length === 1) txt = `צברתם ${teams[0].score} נקודות`;
+  else {
+    const top = Math.max(...teams.map(t => t.score));
+    const win = teams.filter(t => t.score === top);
+    txt = win.length > 1 ? `תיקו! ${win.map(t => t.name).join(" ו")} עם ${top} נקודות` : `${win[0].name} ניצחה עם ${top} נקודות`;
+  }
+  $("winner").textContent = txt;
+  $("end").classList.remove("hidden");
+}
+
+$("reveal").onclick = () => {
+  $("qAns").classList.add("show");
+  $("revealRow").classList.add("hidden");
+  $("awardRow").classList.remove("hidden");
+};
+const showSetup = () => { $("end").classList.add("hidden"); $("ask").classList.add("hidden"); $("setup").classList.remove("hidden"); };
+$("newGame").onclick = showSetup;
+$("again").onclick = showSetup;
+
+[1, 2, 3, 4, 5, 6].forEach(n => {
+  const b = document.createElement("button"); b.className = "btn"; b.textContent = n;
+  b.onclick = () => startGame(n); $("nums").appendChild(b);
+});
+buildBoard();
+</script>
+</body>
+</html>
