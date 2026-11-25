@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>חידון חיפה והכרמל</title>
+<style>
+  :root {
+    --bg: #eaf3f7;
+    --ink: #1c2a33;
+    --muted: #55687a;
+    --accent: #1f6f9a;
+    --accent-dark: #154f6e;
+    --card: #ffffff;
+    --line: #d2e2ec;
+    --good: #2e8b57;
+    --good-bg: #e3f4e9;
+    --bad: #c0392b;
+    --bad-bg: #fbe9e7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", Arial, "Noto Sans Hebrew", sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; min-height: 100vh;
+  }
+  .card {
+    width: min(100%, 720px);
+    background: var(--card); border-radius: 20px;
+    box-shadow: 0 6px 24px rgba(31, 42, 36, .10);
+    padding: clamp(18px, 4vw, 32px);
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .count { font-size: clamp(14px, 2.2vw, 16px); color: var(--muted); font-weight: 600; }
+  .score { font-size: clamp(14px, 2.2vw, 16px); color: var(--accent-dark); font-weight: 700; }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s; }
+  h1 { margin: 0 0 8px; font-size: clamp(24px, 4.4vw, 34px); text-align: center; }
+  h2 { margin: 0 0 18px; font-size: clamp(20px, 3.6vw, 27px); line-height: 1.4; }
+  p.lead { margin: 0 0 22px; text-align: center; font-size: clamp(16px, 2.6vw, 19px); color: var(--muted); line-height: 1.5; }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    font: inherit; font-size: clamp(17px, 2.8vw, 20px); text-align: right;
+    background: #f6f9fb; color: var(--ink);
+    border: 2px solid var(--line); border-radius: 14px;
+    padding: 14px 16px; cursor: pointer; line-height: 1.35;
+    transition: border-color .15s, background .15s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: #eef5fa; }
+  .opt:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: var(--good); background: var(--good-bg); font-weight: 700; }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+  .opt.correct::before { content: "✓ "; color: var(--good); }
+  .opt.wrong::before { content: "✗ "; color: var(--bad); }
+  .feedback {
+    margin-top: 16px; padding: 14px 16px; border-radius: 14px;
+    font-size: clamp(16px, 2.6vw, 18px); line-height: 1.5; display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: var(--good-bg); }
+  .feedback.bad { background: var(--bad-bg); }
+  .feedback b { display: block; margin-bottom: 4px; }
+  .actions { display: flex; justify-content: center; margin-top: 20px; }
+  .btn {
+    font: inherit; font-size: clamp(18px, 3vw, 21px); font-weight: 700;
+    background: var(--accent); color: #fff; border: 0; border-radius: 999px;
+    padding: 12px 38px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-dark);
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-dark); }
+  .btn:focus-visible { outline: 3px solid var(--accent-dark); outline-offset: 3px; }
+  .hidden { display: none !important; }
+  .final { text-align: center; }
+  .big { font-size: clamp(44px, 9vw, 64px); font-weight: 800; color: var(--accent-dark); margin: 6px 0; }
+</style>
+</head>
+<body>
+<main class="card" aria-live="polite">
+
+  <section id="start" class="final">
+    <h1>חידון חיפה והכרמל</h1>
+    <p class="lead">בחנו את עצמכם: עד כמה אתם מכירים את חיפה והכרמל?<br>14 שאלות על מה שלמדנו בשיעור.</p>
+    <div class="actions"><button class="btn" id="go" type="button">מתחילים!</button></div>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="top">
+      <span class="count" id="count"></span>
+      <span class="score" id="score"></span>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+    <h2 id="q"></h2>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="next" type="button">לשאלה הבאה</button></div>
+  </section>
+
+  <section id="end" class="final hidden">
+    <h1>סיימתם!</h1>
+    <div class="big" id="final"></div>
+    <p class="lead" id="msg"></p>
+    <div class="actions"><button class="btn" id="again" type="button">משחקים שוב</button></div>
+  </section>
+
+</main>
+
+<script>
+  // ===== השאלות: התשובה הנכונה היא תמיד הראשונה ברשימה (הסדר מעורבב במסך) =====
+  var QUESTIONS = [
+    {
+      q: "חיפה היא העיר ה... בגודלה בישראל.",
+      a: ["שלישית", "ראשונה", "שנייה", "רביעית"],
+      why: "חיפה היא העיר השלישית בגודלה בישראל, והגדולה ביותר בצפון. לכן קוראים לה הבירה הלא רשמית של הצפון."
+    },
+    {
+      q: "על איזה הר נמצאת העיר חיפה?",
+      a: ["הר הכרמל", "הר החרמון", "הר תבור", "הר מירון"],
+      why: "חיפה נמצאת על הר הכרמל ולמרגלותיו, ליד מפרץ חיפה. היא מתפרשת מהים ועד המדרונות של ההר."
+    },
+    {
+      q: "מה הגובה הכי גבוה של הכרמל?",
+      a: ["546 מטרים מעל פני הים", "346 מטרים מעל פני הים", "846 מטרים מעל פני הים", "1,046 מטרים מעל פני הים"],
+      why: "הכרמל הוא שלוחת הרים שנמשכת מהשומרון ועד מפרץ חיפה, ומתנשאת לגובה של 546 מטרים לכל היותר."
+    },
+    {
+      q: "מה מיוחד ברכס הכרמל, לעומת רכסי הרים אחרים?",
+      a: ["הוא הרכס הקרוב ביותר אל הים", "הוא הרכס הגבוה ביותר בישראל", "הוא הרכס הארוך ביותר בישראל", "הוא הרכס הצפוני ביותר בישראל"],
+      why: "הכרמל הוא הרכס הקרוב ביותר אל הים, והקרבה למים השפיעה מאוד על המבנה שלו."
+    },
+    {
+      q: "מהו \"גידוד ימי\"?",
+      a: ["שחיקה של הסלע על ידי מי הים", "מושבות של בעלי חיים, כמו צדפות, על הסלעים", "ערוצים שהנחלים חופרים במורדות ההר", "חול שהים מביא ומשאיר על החוף"],
+      why: "גידוד ימי הוא שחיקה של הסלע על ידי המים. בגלל הקרבה לים נוצרו בכרמל גם ערוצי נחלים, שוניות ומערות."
+    },
+    {
+      q: "לפי אחת ההשערות, מאיפה בא השם \"כרמל\"?",
+      a: ["מ\"כרם־אל\": כרמו של האל, כי היו בו הרבה כרמים ועצי פרי", "מהצבע האדמדם של הסלעים בהר", "משמה של עיר עתיקה שהייתה על ההר", "מהמילה \"כר\", שפירושה שדה רחב ופתוח"],
+      why: "יש המשערים שהשם בא מ\"כרם־אל\", כרמו של האל, כי בהר היו הרבה כרמים ועצי פרי. השם \"כרמל\" מופיע כבר בתורה."
+    },
+    {
+      q: "כביש החוף, שמחבר בין תל אביב לחיפה, נוסע מדרום לצפון. איזה מספר הוא קיבל?",
+      a: ["2", "1", "3", "5"],
+      why: "כבישים שנוסעים מדרום לצפון מקבלים בארץ מספר זוגי, ולכן כביש החוף קיבל את המספר 2. קוראים לו גם \"דרך אריאל שרון\"."
+    },
+    {
+      q: "חיפה היא עיר נמל. למה משמש הנמל?",
+      a: ["להעברת סחורות מכל העולם, וגם ספינות נופש עוגנות בו", "רק לספינות נופש של תיירים", "רק לסירות של דייגים", "רק לספינות של חיל הים"],
+      why: "בנמל חיפה מעבירים סחורות מכל העולם, וגם ספינות נופש עוגנות בו."
+    },
+    {
+      q: "לפי נתוני 2018, מי הקבוצה הגדולה ביותר מבין תושבי חיפה?",
+      a: ["יהודים", "ערבים מוסלמים", "ערבים נוצרים", "דרוזים"],
+      why: "כ־76% מתושבי חיפה הם יהודים. בעיר חיים גם ערבים מוסלמים, ערבים נוצרים, דרוזים ואחרים. חיפה היא עיר מעורבת, שחיים בה בני כל הדתות."
+    },
+    {
+      q: "מתי פרצה השריפה הגדולה בכרמל, שנקראת \"אסון הכרמל\"?",
+      a: ["בשנת 2010, בחנוכה", "בשנת 2010, באמצע הקיץ", "בשנת 2000, בחנוכה", "בשנת 2016, בסוכות"],
+      why: "אסון הכרמל קרה בחנוכה של שנת 2010. זה אסון השריפה הכבד ביותר שקרה בישראל."
+    },
+    {
+      q: "למה השריפה בכרמל התפשטה כל כך מהר?",
+      a: ["האזור צפוף בעצים ובאצטרובלים דליקים, והיו יובש ורוחות", "כי לא היו באזור כבאים בכלל", "כי השריפה התחילה בתוך העיר חיפה", "כי העצים בכרמל היו ישנים וחולים"],
+      why: "האזור צפוף, עם הרבה עצים ואצטרובלים שנדלקים בקלות. בנוסף היה יובש קיצוני ונשבו רוחות, וזה הקשה על כיבוי השריפה."
+    },
+    {
+      q: "איזו מהפעולות הבאות נעשתה בכרמל אחרי השריפה, כדי למנוע שריפות בעתיד?",
+      a: ["דילול עצים, כדי שלא יהיו צפופים מדי", "נטיעה של הרבה עצים חדשים, צפופים זה ליד זה", "איסור על כניסה של מטיילים ליער, לתמיד", "הרחקה של כל בעלי החיים מהיער"],
+      why: "אחרי השריפה דיללו עצים, סללו דרכי מעבר שעוצרות את התפשטות האש, עודדו מרעה שאוכל צמחים דליקים ופיתחו מערכות שחוזות שריפות."
+    },
+    {
+      q: "אייל הכרמל נעלם מהארץ. מאיפה הביאו איילים ששוחררו בכרמל?",
+      a: ["מאירופה", "מאפריקה", "מאסיה", "מגן חיות בישראל"],
+      why: "לפני כ־25 שנה הביאו איילים מאירופה ושחררו אותם בכרמל. מאז הם התרבו, ואפשר לראות אותם על ההר."
+    },
+    {
+      q: "הסלמנדרה היא דו־חי. מה זה אומר?",
+      a: ["היא מתחילה את חייה במים וממשיכה אותם ביבשה", "היא פעילה גם ביום וגם בלילה", "היא אוכלת גם צמחים וגם בעלי חיים", "היא יכולה לחיות גם בקור וגם בחום"],
+      why: "הסלמנדרה מתחילה את חייה במים וממשיכה אותם ביבשה. היא בסכנת הכחדה, כי בנו באזורים שבהם היא חיה וייבשו מים."
+    }
+  ];
+
+  var order = [], current = 0, score = 0;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function start() {
+    order = shuffle(QUESTIONS.map(function (_, i) { return i; }));
+    current = 0; score = 0;
+    $("start").classList.add("hidden"); $("end").classList.add("hidden"); $("quiz").classList.remove("hidden");
+    show();
+  }
+
+  function show() {
+    var item = QUESTIONS[order[current]];
+    $("count").textContent = "שאלה " + (current + 1) + " מתוך " + QUESTIONS.length;
+    $("score").textContent = "נקודות: " + score;
+    $("bar").style.width = (current / QUESTIONS.length * 100) + "%";
+    $("q").textContent = item.q;
+    var box = $("options"); box.innerHTML = "";
+    shuffle(item.a.map(function (text, i) { return { text: text, right: i === 0 }; })).forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.textContent = o.text;
+      b.dataset.right = o.right ? "1" : "";
+      b.addEventListener("click", function () { answer(b, item); });
+      box.appendChild(b);
+    });
+    var fb = $("feedback"); fb.className = "feedback"; fb.innerHTML = "";
+    $("next").classList.add("hidden");
+    var first = box.querySelector(".opt"); if (first) first.focus({ preventScroll: true });
+  }
+
+  function answer(btn, item) {
+    var right = btn.dataset.right === "1";
+    if (right) score++;
+    Array.prototype.forEach.call($("options").children, function (b) {
+      b.disabled = true;
+      if (b.dataset.right === "1") b.classList.add("correct");
+    });
+    if (!right) btn.classList.add("wrong");
+    $("score").textContent = "נקודות: " + score;
+    var fb = $("feedback");
+    fb.className = "feedback show " + (right ? "good" : "bad");
+    fb.innerHTML = "";
+    var head = document.createElement("b"); head.textContent = right ? "נכון, כל הכבוד!" : "לא בדיוק...";
+    fb.appendChild(head); fb.appendChild(document.createTextNode(item.why));
+    var next = $("next");
+    next.textContent = current === QUESTIONS.length - 1 ? "לתוצאה" : "לשאלה הבאה";
+    next.classList.remove("hidden"); next.focus({ preventScroll: true });
+  }
+
+  function nextQ() {
+    current++;
+    if (current < QUESTIONS.length) { show(); return; }
+    $("bar").style.width = "100%";
+    $("quiz").classList.add("hidden"); $("end").classList.remove("hidden");
+    $("final").textContent = score + " / " + QUESTIONS.length;
+    var p = score / QUESTIONS.length;
+    $("msg").textContent = p === 1 ? "מושלם! אתם מומחים לחיפה והכרמל!"
+      : p >= 0.75 ? "מצוין! אתם מכירים את חיפה והכרמל ממש טוב."
+      : p >= 0.5 ? "יפה! שווה לחזור על השיעור ולנסות שוב."
+      : "כדאי לחזור על השיעור ולנסות שוב. בהצלחה!";
+    $("again").focus({ preventScroll: true });
+  }
+
+  $("go").addEventListener("click", start);
+  $("next").addEventListener("click", nextQ);
+  $("again").addEventListener("click", start);
+</script>
+</body>
+</html>
