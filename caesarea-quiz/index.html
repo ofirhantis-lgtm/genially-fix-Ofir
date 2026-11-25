@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>חידון קיסריה</title>
+<style>
+  :root {
+    --bg: #f5efe4;
+    --ink: #1c2a33;
+    --muted: #55687a;
+    --accent: #a65f22;
+    --accent-dark: #7a4317;
+    --card: #ffffff;
+    --line: #e8dcc8;
+    --good: #2e8b57;
+    --good-bg: #e3f4e9;
+    --bad: #c0392b;
+    --bad-bg: #fbe9e7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", Arial, "Noto Sans Hebrew", sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; min-height: 100vh;
+  }
+  .card {
+    width: min(100%, 720px);
+    background: var(--card); border-radius: 20px;
+    box-shadow: 0 6px 24px rgba(31, 42, 36, .10);
+    padding: clamp(18px, 4vw, 32px);
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .count { font-size: clamp(14px, 2.2vw, 16px); color: var(--muted); font-weight: 600; }
+  .score { font-size: clamp(14px, 2.2vw, 16px); color: var(--accent-dark); font-weight: 700; }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s; }
+  h1 { margin: 0 0 8px; font-size: clamp(24px, 4.4vw, 34px); text-align: center; }
+  h2 { margin: 0 0 18px; font-size: clamp(20px, 3.6vw, 27px); line-height: 1.4; }
+  p.lead { margin: 0 0 22px; text-align: center; font-size: clamp(16px, 2.6vw, 19px); color: var(--muted); line-height: 1.5; }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    font: inherit; font-size: clamp(17px, 2.8vw, 20px); text-align: right;
+    background: #fbf8f2; color: var(--ink);
+    border: 2px solid var(--line); border-radius: 14px;
+    padding: 14px 16px; cursor: pointer; line-height: 1.35;
+    transition: border-color .15s, background .15s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: #f7efe3; }
+  .opt:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: var(--good); background: var(--good-bg); font-weight: 700; }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+  .opt.correct::before { content: "✓ "; color: var(--good); }
+  .opt.wrong::before { content: "✗ "; color: var(--bad); }
+  .feedback {
+    margin-top: 16px; padding: 14px 16px; border-radius: 14px;
+    font-size: clamp(16px, 2.6vw, 18px); line-height: 1.5; display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: var(--good-bg); }
+  .feedback.bad { background: var(--bad-bg); }
+  .feedback b { display: block; margin-bottom: 4px; }
+  .actions { display: flex; justify-content: center; margin-top: 20px; }
+  .btn {
+    font: inherit; font-size: clamp(18px, 3vw, 21px); font-weight: 700;
+    background: var(--accent); color: #fff; border: 0; border-radius: 999px;
+    padding: 12px 38px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-dark);
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-dark); }
+  .btn:focus-visible { outline: 3px solid var(--accent-dark); outline-offset: 3px; }
+  .hidden { display: none !important; }
+  .final { text-align: center; }
+  .big { font-size: clamp(44px, 9vw, 64px); font-weight: 800; color: var(--accent-dark); margin: 6px 0; }
+</style>
+</head>
+<body>
+<main class="card" aria-live="polite">
+
+  <section id="start" class="final">
+    <h1>חידון קיסריה</h1>
+    <p class="lead">בחנו את עצמכם: עד כמה אתם מכירים את קיסריה?<br>14 שאלות על מה שלמדנו בשיעור.</p>
+    <div class="actions"><button class="btn" id="go" type="button">מתחילים!</button></div>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="top">
+      <span class="count" id="count"></span>
+      <span class="score" id="score"></span>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+    <h2 id="q"></h2>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="next" type="button">לשאלה הבאה</button></div>
+  </section>
+
+  <section id="end" class="final hidden">
+    <h1>סיימתם!</h1>
+    <div class="big" id="final"></div>
+    <p class="lead" id="msg"></p>
+    <div class="actions"><button class="btn" id="again" type="button">משחקים שוב</button></div>
+  </section>
+
+</main>
+
+<script>
+  // ===== השאלות: התשובה הנכונה היא תמיד הראשונה ברשימה (הסדר מעורבב במסך) =====
+  var QUESTIONS = [
+    {
+      q: "על שם מי נקראה העיר קיסריה?",
+      a: ["על שם הקיסר הרומי אוגוסטוס", "על שם המלך הורדוס", "על שם המלך שלמה", "על שם הקיסר יוליוס"],
+      why: "הקיסר הרומי אוגוסטוס נתן את המקום במתנה להורדוס. הורדוס בנה בו עיר נמל גדולה וקרא לה קיסריה, על שם אוגוסטוס קיסר."
+    },
+    {
+      q: "מי בנה את קיסריה כעיר נמל גדולה?",
+      a: ["המלך הורדוס", "הקיסר אוגוסטוס", "המלך דוד", "הצלבנים"],
+      why: "הורדוס בנה במקום עיר נמל גדולה ונמל ענק. בגלל כל המבנים שהקים, קוראים לו \"הורדוס הבנאי\"."
+    },
+    {
+      q: "מה קיבל הורדוס במתנה מהקיסר אוגוסטוס, בשנת 31 לפני הספירה?",
+      a: ["את היישוב, יחד עם כל החוף של ארץ ישראל", "את העיר ירושלים", "צי של ספינות מלחמה", "את הכנרת ואת כל הגליל"],
+      why: "אחרי שניצח בקרב, נתן הקיסר אוגוסטוס להורדוס את היישוב, יחד עם כל החוף של ארץ ישראל."
+    },
+    {
+      q: "איזה מהמבנים הבאים בנה הורדוס בקיסריה?",
+      a: ["תיאטרון, ששופץ בימינו", "מגדלור גבוה בקצה הנמל", "ארמון על פסגת הר הכרמל", "גשר מעל נחל תנינים"],
+      why: "הורדוס בנה בקיסריה מתקני שעשועים, אמפיתיאטרון, תיאטרון (ששופץ בימינו), בתי מרחץ ומקדשים, וגם נמל ענק."
+    },
+    {
+      q: "קיסריה הייתה \"חלון אל התרבויות שמעבר לים\". אילו קבוצות חיו בה במהלך השנים?",
+      a: ["יהודים, נוצרים, מוסלמים ופגנים (עובדי אלילים)", "רק יהודים", "רק רומאים ויוונים", "רק נוצרים ומוסלמים"],
+      why: "בקיסריה חיו בתקופות שונות פגנים, יהודים, נוצרים ומוסלמים. הקהילה היהודית בה הפכה למרכז יהודי חשוב."
+    },
+    {
+      q: "מי חידשו את היישוב בקיסריה, אחרי שהעיר חרבה?",
+      a: ["קבוצה של גרמנים פרוטסטנטים", "קבוצה של עולים מתימן", "קבוצה של נזירים מאיטליה", "קבוצה של דייגים מיוון"],
+      why: "אחרי שקיסריה נכבשה ואז חרבה, היישוב בה התחדש על ידי קבוצה של גרמנים פרוטסטנטים."
+    },
+    {
+      q: "איך אנחנו יודעים מה קרה בקיסריה בכל התקופות?",
+      a: ["לפי ממצאים ארכיאולוגיים, פסיפסים וספרי היסטוריה", "לפי סיפורים של התושבים שגרים בה היום", "לפי מכתבים שהורדוס השאיר בנמל", "לפי ציורים שנמצאו במערות הכרמל"],
+      why: "בקיסריה נמצאו ממצאים ארכיאולוגיים רבים. לפי סוגי האבנים והעצים, שרידי העתיקות, הפסיפסים וספרי ההיסטוריה, אפשר לדעת מה קרה בכל תקופה."
+    },
+    {
+      q: "בקיסריה נשאר קיר בגובה 15 מטרים. מאיזו תקופה הוא?",
+      a: ["מהתקופה הצלבנית", "מהתקופה הרומית", "מהתקופה העות'מאנית", "מתקופת המנדט הבריטי"],
+      why: "הקיר הוא חלק ממבנה צלבני. בתקופה הצלבנית שימש המבנה מרכז מנהלי של מחוז קיסריה."
+    },
+    {
+      q: "למה נבנתה בקיסריה אמת המים (האקוודוקט)?",
+      a: ["כדי להביא לעיר מים בקביעות, למזרקות ולבתי המרחץ", "כדי להגן על העיר מפני אויבים", "כדי להשקות את השדות שמסביב לעיר", "כדי לנקז מהעיר את מי הגשמים"],
+      why: "בקיסריה הייתה רמת חיים גבוהה, עם מזרקות ובתי מרחץ, ולכן היה צריך להביא אליה מים בקביעות."
+    },
+    {
+      q: "מאיפה הביאה אמת המים מים לקיסריה?",
+      a: ["ממעיינות שוני ומאזור נחל תנינים", "מהכנרת", "מנהר הירדן", "מהים התיכון"],
+      why: "אמת המים הובילה מים ממעיינות שוני ומאזור נחל תנינים. היא בנויה על קשתות, כמו שבנו הרומאים באותה תקופה."
+    },
+    {
+      q: "איך השיעור מתאר את היישוב קיסריה של היום?",
+      a: ["יישוב יוקרתי, שבנוי בעיקר בבתים מפוארים בני קומה אחת", "עיר גדולה עם הרבה בנייני מגורים גבוהים", "קיבוץ קטן שעוסק בחקלאות", "כפר קטן של דייגים ליד הנמל"],
+      why: "ליד קיסריה העתיקה נמצא היישוב הקהילתי. זה אחד היישובים היוקרתיים בארץ, עם בתים מפוארים בני קומה אחת."
+    },
+    {
+      q: "למה הביאו לארץ את הצמח טיונית החולות, בשנת 1975?",
+      a: ["כדי לייצב את החולות במפרץ חיפה", "כדי לקשט גינות ופארקים", "כדי להאכיל בו פרות וכבשים", "כדי להפיק ממנו תרופות"],
+      why: "טיונית החולות הובאה כדי לייצב חולות במפרץ חיפה. היא התפשטה עד חולות קיסריה, והיא מסכנת את הצמחים הטבעיים של מישור החוף."
+    },
+    {
+      q: "באזור החולי של קיסריה אפשר למצוא הרבה...",
+      a: ["זוחלים ומכרסמים", "קופים ותוכים", "דובים וזאבים", "צבאים ויעלים"],
+      why: "בגלל הסביבה החולית אפשר למצוא באזור קיסריה זוחלים ומכרסמים רבים, כמו חדף, קמטן ושנונית."
+    },
+    {
+      q: "בשנת 2020 בחר מגזין תיירות את קיסריה כאחד מ־50 המקומות הטובים בעולם. למה?",
+      a: ["בגלל השילוב המוצלח של עתיקות ומודרניות", "בגלל שיש בה את החוף הארוך בעולם", "בגלל שהיא העיר העתיקה ביותר בעולם", "בגלל פארק השעשועים הגדול שבה"],
+      why: "לפי המגזין, השילוב המוצלח בין העתיקות לבין המודרניות מושך לקיסריה יותר מבקרים."
+    }
+  ];
+
+  var order = [], current = 0, score = 0;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function start() {
+    order = shuffle(QUESTIONS.map(function (_, i) { return i; }));
+    current = 0; score = 0;
+    $("start").classList.add("hidden"); $("end").classList.add("hidden"); $("quiz").classList.remove("hidden");
+    show();
+  }
+
+  function show() {
+    var item = QUESTIONS[order[current]];
+    $("count").textContent = "שאלה " + (current + 1) + " מתוך " + QUESTIONS.length;
+    $("score").textContent = "נקודות: " + score;
+    $("bar").style.width = (current / QUESTIONS.length * 100) + "%";
+    $("q").textContent = item.q;
+    var box = $("options"); box.innerHTML = "";
+    shuffle(item.a.map(function (text, i) { return { text: text, right: i === 0 }; })).forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.textContent = o.text;
+      b.dataset.right = o.right ? "1" : "";
+      b.addEventListener("click", function () { answer(b, item); });
+      box.appendChild(b);
+    });
+    var fb = $("feedback"); fb.className = "feedback"; fb.innerHTML = "";
+    $("next").classList.add("hidden");
+    var first = box.querySelector(".opt"); if (first) first.focus({ preventScroll: true });
+  }
+
+  function answer(btn, item) {
+    var right = btn.dataset.right === "1";
+    if (right) score++;
+    Array.prototype.forEach.call($("options").children, function (b) {
+      b.disabled = true;
+      if (b.dataset.right === "1") b.classList.add("correct");
+    });
+    if (!right) btn.classList.add("wrong");
+    $("score").textContent = "נקודות: " + score;
+    var fb = $("feedback");
+    fb.className = "feedback show " + (right ? "good" : "bad");
+    fb.innerHTML = "";
+    var head = document.createElement("b"); head.textContent = right ? "נכון, כל הכבוד!" : "לא בדיוק...";
+    fb.appendChild(head); fb.appendChild(document.createTextNode(item.why));
+    var next = $("next");
+    next.textContent = current === QUESTIONS.length - 1 ? "לתוצאה" : "לשאלה הבאה";
+    next.classList.remove("hidden"); next.focus({ preventScroll: true });
+  }
+
+  function nextQ() {
+    current++;
+    if (current < QUESTIONS.length) { show(); return; }
+    $("bar").style.width = "100%";
+    $("quiz").classList.add("hidden"); $("end").classList.remove("hidden");
+    $("final").textContent = score + " / " + QUESTIONS.length;
+    var p = score / QUESTIONS.length;
+    $("msg").textContent = p === 1 ? "מושלם! אתם מומחים לקיסריה!"
+      : p >= 0.75 ? "מצוין! אתם מכירים את קיסריה ממש טוב."
+      : p >= 0.5 ? "יפה! שווה לחזור על השיעור ולנסות שוב."
+      : "כדאי לחזור על השיעור ולנסות שוב. בהצלחה!";
+    $("again").focus({ preventScroll: true });
+  }
+
+  $("go").addEventListener("click", start);
+  $("next").addEventListener("click", nextQ);
+  $("again").addEventListener("click", start);
+</script>
+</body>
+</html>
