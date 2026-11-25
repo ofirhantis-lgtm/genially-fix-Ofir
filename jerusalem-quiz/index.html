@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>חידון ירושלים</title>
+<style>
+  :root {
+    --bg: #f3ede0;
+    --ink: #1c2a33;
+    --muted: #55687a;
+    --accent: #9c7424;
+    --accent-dark: #6b4f17;
+    --card: #ffffff;
+    --line: #e8dcc8;
+    --good: #2e8b57;
+    --good-bg: #e3f4e9;
+    --bad: #c0392b;
+    --bad-bg: #fbe9e7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", Arial, "Noto Sans Hebrew", sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; min-height: 100vh;
+  }
+  .card {
+    width: min(100%, 720px);
+    background: var(--card); border-radius: 20px;
+    box-shadow: 0 6px 24px rgba(31, 42, 36, .10);
+    padding: clamp(18px, 4vw, 32px);
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .count { font-size: clamp(14px, 2.2vw, 16px); color: var(--muted); font-weight: 600; }
+  .score { font-size: clamp(14px, 2.2vw, 16px); color: var(--accent-dark); font-weight: 700; }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 20px; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s; }
+  h1 { margin: 0 0 8px; font-size: clamp(24px, 4.4vw, 34px); text-align: center; }
+  h2 { margin: 0 0 18px; font-size: clamp(20px, 3.6vw, 27px); line-height: 1.4; }
+  p.lead { margin: 0 0 22px; text-align: center; font-size: clamp(16px, 2.6vw, 19px); color: var(--muted); line-height: 1.5; }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    font: inherit; font-size: clamp(17px, 2.8vw, 20px); text-align: right;
+    background: #fbf8f2; color: var(--ink);
+    border: 2px solid var(--line); border-radius: 14px;
+    padding: 14px 16px; cursor: pointer; line-height: 1.35;
+    transition: border-color .15s, background .15s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: #f7efe3; }
+  .opt:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: var(--good); background: var(--good-bg); font-weight: 700; }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+  .opt.correct::before { content: "✓ "; color: var(--good); }
+  .opt.wrong::before { content: "✗ "; color: var(--bad); }
+  .feedback {
+    margin-top: 16px; padding: 14px 16px; border-radius: 14px;
+    font-size: clamp(16px, 2.6vw, 18px); line-height: 1.5; display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { background: var(--good-bg); }
+  .feedback.bad { background: var(--bad-bg); }
+  .feedback b { display: block; margin-bottom: 4px; }
+  .actions { display: flex; justify-content: center; margin-top: 20px; }
+  .btn {
+    font: inherit; font-size: clamp(18px, 3vw, 21px); font-weight: 700;
+    background: var(--accent); color: #fff; border: 0; border-radius: 999px;
+    padding: 12px 38px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-dark);
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-dark); }
+  .btn:focus-visible { outline: 3px solid var(--accent-dark); outline-offset: 3px; }
+  .hidden { display: none !important; }
+  .final { text-align: center; }
+  .big { font-size: clamp(44px, 9vw, 64px); font-weight: 800; color: var(--accent-dark); margin: 6px 0; }
+</style>
+</head>
+<body>
+<main class="card" aria-live="polite">
+
+  <section id="start" class="final">
+    <h1>חידון ירושלים</h1>
+    <p class="lead">בחנו את עצמכם: עד כמה אתם מכירים את ירושלים?<br>14 שאלות על מה שלמדנו בשיעור.</p>
+    <div class="actions"><button class="btn" id="go" type="button">מתחילים!</button></div>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="top">
+      <span class="count" id="count"></span>
+      <span class="score" id="score"></span>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+    <h2 id="q"></h2>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="next" type="button">לשאלה הבאה</button></div>
+  </section>
+
+  <section id="end" class="final hidden">
+    <h1>סיימתם!</h1>
+    <div class="big" id="final"></div>
+    <p class="lead" id="msg"></p>
+    <div class="actions"><button class="btn" id="again" type="button">משחקים שוב</button></div>
+  </section>
+
+</main>
+
+<script>
+  // ===== השאלות: התשובה הנכונה היא תמיד הראשונה ברשימה (הסדר מעורבב במסך) =====
+  var QUESTIONS = [
+    {
+      q: "לאילו דתות ירושלים היא עיר קדושה?",
+      a: ["ליהדות, לנצרות ולאסלאם", "רק ליהדות", "ליהדות ולנצרות בלבד", "ליהדות ולאסלאם בלבד"],
+      why: "ירושלים מקודשת ביהדות, בנצרות ובאסלאם. בירושלים יש מקומות קדושים לכל שלוש הדתות."
+    },
+    {
+      q: "לפי השיעור, למה הייתה ירושלים לאורך ההיסטוריה מוקד של מלחמות וסכסוכים?",
+      a: ["בגלל החשיבות הדתית שלה לשלוש הדתות", "בגלל מקורות המים הרבים שבה", "בגלל שהייתה עיר נמל חשובה", "בגלל שעברה בה דרך המסחר הראשית של הארץ"],
+      why: "ירושלים חשובה מאוד לשלוש הדתות, ולכן לאורך ההיסטוריה נלחמו עליה הרבה פעמים."
+    },
+    {
+      q: "באיזו שנה הוכרזה העיר העתיקה בירושלים כאתר מורשת עולמית?",
+      a: ["בשנת 1981", "בשנת 1948", "בשנת 1967", "בשנת 2001"],
+      why: "בשנת 1981 הוכרזה העיר העתיקה כאתר מורשת עולמית של ארגון אונסקו."
+    },
+    {
+      q: "לכמה רובעים מחולקת העיר העתיקה, ומה הם?",
+      a: ["ארבעה: מוסלמי, יהודי, נוצרי וארמני", "שלושה: מוסלמי, יהודי ונוצרי", "ארבעה: מוסלמי, יהודי, נוצרי ויווני", "שניים: יהודי וערבי"],
+      why: "העיר העתיקה מחולקת לארבעה רובעים: הרובע המוסלמי, הרובע היהודי, הרובע הנוצרי והרובע הארמני."
+    },
+    {
+      q: "כמה שערים יש בחומת העיר העתיקה?",
+      a: ["7 שערים", "4 שערים", "12 שערים", "3 שערים"],
+      why: "בחומה שמקיפה את העיר העתיקה יש 7 שערים."
+    },
+    {
+      q: "אילו מקומות נחשבים לחלק מהעיר העתיקה, אף שהם נמצאים מחוץ לחומות?",
+      a: ["הר ציון ועיר דוד", "הכותל המערבי וכנסיית הקבר", "קריית הממשלה והכנסת", "שוק מחנה יהודה וגן החיות התנכי"],
+      why: "העיר העתיקה מוקפת בחומות, אבל גם הר ציון ועיר דוד, שנמצאים מחוץ לחומות, נחשבים לחלק ממנה."
+    },
+    {
+      q: "מה עמד בעבר על הר הבית?",
+      a: ["בית המקדש הראשון ובית המקדש השני", "הארמון של המלך דוד", "המצודה של המלך הורדוס", "בית הכנסת הגדול של ירושלים"],
+      why: "הר הבית הוא המקום הקדוש ביותר לעם היהודי. עמד בו המבנה הקדוש ביותר ליהודים: בית המקדש, הראשון והשני."
+    },
+    {
+      q: "כמה פעמים ביום פונים היהודים בתפילה לכיוון הר הבית?",
+      a: ["שלוש פעמים ביום", "פעם אחת ביום", "פעמיים ביום", "רק בשבתות ובחגים"],
+      why: "היהודים פונים לכיוון הר הבית בתפילה שלוש פעמים ביום, ומתפללים להקמת בית המקדש השלישי."
+    },
+    {
+      q: "מי יזם את השיפוץ הגדול בהר הבית, שבמהלכו נבנה הכותל המערבי?",
+      a: ["המלך הורדוס", "המלך שלמה", "המלך דוד", "הקיסר הרומי אוגוסטוס"],
+      why: "הכותל המערבי נבנה כחלק משיפוץ גדול מאוד שיזם המלך הורדוס בהר הבית, במאה הראשונה לפני הספירה."
+    },
+    {
+      q: "למה בנה הורדוס את הכותל המערבי ואת שאר הקירות סביב הר הבית?",
+      a: ["כדי לתמוך ברחבה הגדולה שהרחיב סביב ההר", "כדי להגן על העיר מפני אויבים", "כדי להפריד בין הרובעים של העיר", "כדי לאסוף מי גשמים לבורות המים"],
+      why: "הורדוס הרחיב את הר הבית. כדי לתמוך ברחבה הגדולה הוא בנה ארבעה קירות תמך עצומים. הכותל המערבי הוא הארוך מביניהם."
+    },
+    {
+      q: "נבי סמואל הוא מקום קדוש לשלוש הדתות. של מי הקבר שנמצא שם, לפי המסורת?",
+      a: ["של שמואל הנביא", "של דוד המלך", "של שלמה המלך", "של ירמיהו הנביא"],
+      why: "נבי סמואל הוא קבר שמואל הנביא. יש בו מסגד על מצודה צלבנית, והיום הוא משמש גם כבית כנסת ואתר עלייה לרגל."
+    },
+    {
+      q: "כנסיית יעקב הקדוש היא הכנסייה המרכזית באיזה רובע?",
+      a: ["ברובע הארמני", "ברובע הנוצרי", "ברובע היהודי", "ברובע המוסלמי"],
+      why: "כנסיית יעקב הקדוש היא הכנסייה המרכזית ברובע הארמני. הארמנים קוראים לה \"סורפו הגופ\"."
+    },
+    {
+      q: "קריית הממשלה בירושלים נקראת על שם מי?",
+      a: ["דוד בן־גוריון", "תיאודור הרצל", "מנחם בגין", "יצחק רבין"],
+      why: "קריית הממשלה נקראת על שם דוד בן־גוריון. בירושלים נמצאים הכנסת, בית המשפט העליון, בית ראש הממשלה, משכן הנשיא ורוב משרדי הממשלה."
+    },
+    {
+      q: "במעלית הזמן בירושלים לומדים היסטוריה בדרך חווייתית. את מי \"פוגשים\" שם?",
+      a: ["את שלמה, ירמיהו והורדוס", "את אברהם, משה ויהושע", "את דוד, אליהו ויהודה המכבי", "את רבי עקיבא, בר כוכבא והקיסר טיטוס"],
+      why: "במעלית הזמן פוגשים את שלמה, ירמיהו והורדוס, ומכירים את ההיסטוריה של ירושלים בדרך חווייתית ומרתקת."
+    }
+  ];
+
+  var order = [], current = 0, score = 0;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  function start() {
+    order = shuffle(QUESTIONS.map(function (_, i) { return i; }));
+    current = 0; score = 0;
+    $("start").classList.add("hidden"); $("end").classList.add("hidden"); $("quiz").classList.remove("hidden");
+    show();
+  }
+
+  function show() {
+    var item = QUESTIONS[order[current]];
+    $("count").textContent = "שאלה " + (current + 1) + " מתוך " + QUESTIONS.length;
+    $("score").textContent = "נקודות: " + score;
+    $("bar").style.width = (current / QUESTIONS.length * 100) + "%";
+    $("q").textContent = item.q;
+    var box = $("options"); box.innerHTML = "";
+    shuffle(item.a.map(function (text, i) { return { text: text, right: i === 0 }; })).forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.textContent = o.text;
+      b.dataset.right = o.right ? "1" : "";
+      b.addEventListener("click", function () { answer(b, item); });
+      box.appendChild(b);
+    });
+    var fb = $("feedback"); fb.className = "feedback"; fb.innerHTML = "";
+    $("next").classList.add("hidden");
+    var first = box.querySelector(".opt"); if (first) first.focus({ preventScroll: true });
+  }
+
+  function answer(btn, item) {
+    var right = btn.dataset.right === "1";
+    if (right) score++;
+    Array.prototype.forEach.call($("options").children, function (b) {
+      b.disabled = true;
+      if (b.dataset.right === "1") b.classList.add("correct");
+    });
+    if (!right) btn.classList.add("wrong");
+    $("score").textContent = "נקודות: " + score;
+    var fb = $("feedback");
+    fb.className = "feedback show " + (right ? "good" : "bad");
+    fb.innerHTML = "";
+    var head = document.createElement("b"); head.textContent = right ? "נכון, כל הכבוד!" : "לא בדיוק...";
+    fb.appendChild(head); fb.appendChild(document.createTextNode(item.why));
+    var next = $("next");
+    next.textContent = current === QUESTIONS.length - 1 ? "לתוצאה" : "לשאלה הבאה";
+    next.classList.remove("hidden"); next.focus({ preventScroll: true });
+  }
+
+  function nextQ() {
+    current++;
+    if (current < QUESTIONS.length) { show(); return; }
+    $("bar").style.width = "100%";
+    $("quiz").classList.add("hidden"); $("end").classList.remove("hidden");
+    $("final").textContent = score + " / " + QUESTIONS.length;
+    var p = score / QUESTIONS.length;
+    $("msg").textContent = p === 1 ? "מושלם! אתם מומחים לירושלים!"
+      : p >= 0.75 ? "מצוין! אתם מכירים את ירושלים ממש טוב."
+      : p >= 0.5 ? "יפה! שווה לחזור על השיעור ולנסות שוב."
+      : "כדאי לחזור על השיעור ולנסות שוב. בהצלחה!";
+    $("again").focus({ preventScroll: true });
+  }
+
+  $("go").addEventListener("click", start);
+  $("next").addEventListener("click", nextQ);
+  $("again").addEventListener("click", start);
+</script>
+</body>
+</html>
